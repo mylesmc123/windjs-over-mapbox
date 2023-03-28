@@ -11,14 +11,14 @@
 */
 
 var Windy = function (params) {
-  var VELOCITY_SCALE = 0.021;             // scale for wind velocity (completely arbitrary--this value looks nice)
+  var VELOCITY_SCALE = 0.011;             // scale for wind velocity (completely arbitrary--this value looks nice)
   var INTENSITY_SCALE_STEP = 10;            // step size of particle intensity color scale
   var MAX_WIND_INTENSITY = 40;              // wind velocity at which particle intensity is maximum (m/s)
   var MAX_PARTICLE_AGE = 100;                // max number of frames a particle is drawn before regeneration
-  var PARTICLE_LINE_WIDTH = 0.6;              // line width of a drawn particle
+  var PARTICLE_LINE_WIDTH = 2;              // line width of a drawn particle
   var PARTICLE_MULTIPLIER = 1 / 30;              // particle count scalar (completely arbitrary--this values looks nice)
-  var PARTICLE_REDUCTION = 0.5;            // reduce particle count to this much of normal for mobile devices
-  var FRAME_RATE = 60;                      // desired milliseconds per frame
+  var PARTICLE_REDUCTION = 0.75;            // reduce particle count to this much of normal for mobile devices
+  var FRAME_RATE = 20;                      // desired milliseconds per frame
   var BOUNDARY = 0.45;
 
   var NULL_WIND_VECTOR = [NaN, NaN, null];  // singleton for no wind in the form: [u, v, magnitude]
@@ -81,7 +81,7 @@ var Windy = function (params) {
     var isContinuous = Math.floor(ni * Δλ) >= 360;
     for (var j = 0; j < nj; j++) {
       var row = [];
-      for (var i = 0; i < ni; i++ , p++) {
+      for (var i = 0; i < ni; i++, p++) {
         row[i] = builder.data(p);
       }
       if (isContinuous) {
@@ -147,7 +147,6 @@ var Windy = function (params) {
    * @returns {Boolean} true if agent is probably a mobile device. Don't really care if this is accurate.
    */
   var isMobile = function () {
-    return true;
     return (/android|blackberry|iemobile|ipad|iphone|ipod|opera mini|webos/i).test(navigator.userAgent);
   }
 
@@ -314,8 +313,47 @@ var Windy = function (params) {
 
   var animate = function (bounds, field) {
 
+    function asColorStyle(r, g, b, a) {
+      return "rgba(" + 243 + ", " + 243 + ", " + 238 + ", " + a + ")";
+    }
+
+    function hexToR(h) { return parseInt((cutHex(h)).substring(0, 2), 16) }
+    function hexToG(h) { return parseInt((cutHex(h)).substring(2, 4), 16) }
+    function hexToB(h) { return parseInt((cutHex(h)).substring(4, 6), 16) }
+    function cutHex(h) { return (h.charAt(0) == "#") ? h.substring(1, 7) : h }
+
     function windIntensityColorScale(step, maxWind) {
-      result = ["#d73027", "#f46d43", "#fdae61", "#fee090", "#ffffbf", "#e0f3f8", "#abd9e9", "#74add1", "#4575b4"];
+
+      var result = [
+        /* blue to red
+        "rgba(" + hexToR('#178be7') + ", " + hexToG('#178be7') + ", " + hexToB('#178be7') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#8888bd') + ", " + hexToG('#8888bd') + ", " + hexToB('#8888bd') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#b28499') + ", " + hexToG('#b28499') + ", " + hexToB('#b28499') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#cc7e78') + ", " + hexToG('#cc7e78') + ", " + hexToB('#cc7e78') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#de765b') + ", " + hexToG('#de765b') + ", " + hexToB('#de765b') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#ec6c42') + ", " + hexToG('#ec6c42') + ", " + hexToB('#ec6c42') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#f55f2c') + ", " + hexToG('#f55f2c') + ", " + hexToB('#f55f2c') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#fb4f17') + ", " + hexToG('#fb4f17') + ", " + hexToB('#fb4f17') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#fe3705') + ", " + hexToG('#fe3705') + ", " + hexToB('#fe3705') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#ff0000') + ", " + hexToG('#ff0000') + ", " + hexToB('#ff0000') + ", " + 0.5 + ")"
+        */
+        "rgba(" + hexToR('#00ffff') + ", " + hexToG('#00ffff') + ", " + hexToB('#00ffff') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#64f0ff') + ", " + hexToG('#64f0ff') + ", " + hexToB('#64f0ff') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#87e1ff') + ", " + hexToG('#87e1ff') + ", " + hexToB('#87e1ff') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#a0d0ff') + ", " + hexToG('#a0d0ff') + ", " + hexToB('#a0d0ff') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#b5c0ff') + ", " + hexToG('#b5c0ff') + ", " + hexToB('#b5c0ff') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#c6adff') + ", " + hexToG('#c6adff') + ", " + hexToB('#c6adff') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#d49bff') + ", " + hexToG('#d49bff') + ", " + hexToB('#d49bff') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#e185ff') + ", " + hexToG('#e185ff') + ", " + hexToB('#e185ff') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#ec6dff') + ", " + hexToG('#ec6dff') + ", " + hexToB('#ec6dff') + ", " + 0.5 + ")",
+        "rgba(" + hexToR('#ff1edb') + ", " + hexToG('#ff1edb') + ", " + hexToB('#ff1edb') + ", " + 0.5 + ")"
+      ]
+      /*
+      var result = [];
+      for (var j = 225; j >= 100; j = j - step) {
+        result.push(asColorStyle(j, j, j, 1));
+      }
+      */
       result.indexFor = function (m) {  // map wind speed to a style
         return Math.floor(Math.min(m, maxWind) / maxWind * (result.length - 1));
       };
@@ -371,17 +409,14 @@ var Windy = function (params) {
 
     var g = params.canvas.getContext("2d");
     g.lineWidth = PARTICLE_LINE_WIDTH;
-    console.log()
     g.fillStyle = fadeFillStyle;
-    g.globalAlpha = 0.6;
 
     function draw() {
       // Fade existing particle trails.
-      var prev = "lighter";
+      var prev = g.globalCompositeOperation;
       g.globalCompositeOperation = "destination-in";
       g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
       g.globalCompositeOperation = prev;
-      g.globalAlpha = 0.9;
 
       // Draw new particle trails.
       buckets.forEach(function (bucket, i) {
@@ -413,10 +448,8 @@ var Windy = function (params) {
     })();
   }
 
-  var start = function (bounds, width, height, extent, finalParams) {
-    if (finalParams && finalParams.particleLineWidth) {
-      PARTICLE_LINE_WIDTH = finalParams.particleLineWidth;
-    }
+  var start = function (bounds, width, height, extent) {
+
     var mapBounds = {
       south: deg2rad(extent[0][1]),
       north: deg2rad(extent[1][1]),

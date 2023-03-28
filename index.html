@@ -40,22 +40,37 @@
     let windy;
     let timeout;
 
+    function coord4326To3857(coord) {
+
+      const X = 20037508.34;
+
+      let long3857 = (coord.lng * X) / 180;
+
+      let lat3857 = parseFloat(coord.lat) + 90;
+      lat3857 = lat3857 * (Math.PI / 360);
+      lat3857 = Math.tan(lat3857);
+      lat3857 = Math.log(lat3857);
+      lat3857 = lat3857 / (Math.PI / 180);
+
+      lat3857 = (lat3857 * X) / 180;
+
+      return { lat: lat3857, lng: long3857 };
+    }
+
     mapboxgl.accessToken = 'pk.eyJ1Ijoia2F0YW1hcmFuaTQiLCJhIjoiY2ppNDdtenh5MDFkYTN2b2VjOG5ucmIybCJ9.AG0bncC30hHPHVRnVGeCxQ'
 
     const map = new mapboxgl.Map({
       container: 'mapbox_map',
-      center: [45, 0],
-      zoom: 1.5,
+      center: [-90, 30],
+      zoom: 2,
       style: 'mapbox://styles/katamarani4/ck5s617rv0px31it4t0l3bd0o',
       maxBounds: [
-        [-180, -60], // Southwest coordinates
-        [180, 70] // Northeast coordinates
+        [-179, -59], // Southwest coordinates
+        [179, 69] // Northeast coordinates
       ]
     });
 
     map.doubleClickZoom.disable();
-
-
 
     var geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken,
@@ -88,8 +103,23 @@
 
     function resetWind(map) {
       const obj = getEventObject(map);
+      // console.log(obj);
       const { zoomLevel, north, south, west, east, width, height } = obj;
-      mapcanvas.style.display = 'none';
+
+      northEast = coord4326To3857({
+        'lat': north,
+        'lng': east
+      })
+      north3857 = northEast.lat
+      east3857 = northEast.lng
+
+      southWest = coord4326To3857({
+        'lat': south,
+        'lng': west
+      })
+      south3857 = southWest.lat
+      west3857 = southWest.lng
+
       if (windy) {
         windy.stop();
       }
@@ -116,11 +146,18 @@
         mapcanvas.style.display = 'initial';
         mapcanvas.width = width;
         mapcanvas.height = height;
+        // console.log('west: ' + west);
+        // console.log('east: ' + east);
+        console.log('west3857, south3857, east3857, north3857,')
+        console.log(west3857, south3857, east3857, north3857);
+        // console.log(northEast);
+        // console.log('Need to convert these 4326 coordinates to 3857 for Windy');
         windy.start(
           [[0, 0], [width, height]],
           width,
           height,
-          [[west, south,], [east, north,]],
+          [[west3857, south3857,], [east3857, north3857,]],
+          // [[west, south,], [east, north,]],
           { particleLineWidth: particleWidth }
         );
       }, 500)
@@ -139,13 +176,38 @@
         east: dimensions.getEast(),
         zoomLevel: map.getZoom()
       }
-      return result;
+
+      northEast = coord4326To3857({
+        'lat': result.north,
+        'lng': result.east
+      })
+      north3857 = northEast.lat
+      east3857 = northEast.lng
+
+      southWest = coord4326To3857({
+        'lat': result.south,
+        'lng': result.west
+      })
+      south3857 = southWest.lat
+      west3857 = southWest.lng
+
+      result3857 = {
+        width: canvas.width,
+        height: canvas.height,
+        north: north3857,
+        south: south3857,
+        west: west3857,
+        east: east3857,
+        zoomLevel: map.getZoom()
+      }
+      return result3857;
     }
 
     fetch('gfs.json')
       .then(d => d.json())
       .then((data) => {
-        console.log(data);
+        // console.log('data:');
+        // console.log(data);
         // Remember - dom elements with ID, are exposed globally, so mapcanvas element exists already
         windy = new Windy({ canvas: mapcanvas, data: data });
         resetWind(map)
@@ -155,7 +217,7 @@
   </script>
 
 </body>
-  <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
 <script>
   kofiWidgetOverlay.draw('bumbeishvili', {
     'type': 'floating-chat',
