@@ -228,6 +228,7 @@ var Windy = function (params) {
     var y = Math.max(Math.floor(upperLeft[1], 0), 0);
     var xMax = Math.min(Math.ceil(lowerRight[0], width), width - 1);
     var yMax = Math.min(Math.ceil(lowerRight[1], height), height - 1);
+    // console.log({ x: x, y: y, xMax: width, yMax: yMax, width: width, height: height });
     return { x: x, y: y, xMax: width, yMax: yMax, width: width, height: height };
   };
 
@@ -240,6 +241,7 @@ var Windy = function (params) {
   };
 
   var invert = function (x, y, windy) {
+    // console.log(windy);
     var mapLonDelta = windy.east - windy.west;
     var worldMapRadius = windy.width / rad2deg(mapLonDelta) * 360 / (2 * Math.PI);
     var mapOffsetY = (worldMapRadius / 2 * Math.log((1 + Math.sin(windy.south)) / (1 - Math.sin(windy.south))));
@@ -449,7 +451,7 @@ var Windy = function (params) {
   }
 
   var start = function (bounds, width, height, extent) {
-
+    // console.log(extent);
     var mapBounds = {
       south: deg2rad(extent[0][1]),
       north: deg2rad(extent[1][1]),
@@ -458,7 +460,7 @@ var Windy = function (params) {
       width: width,
       height: height
     };
-
+    // console.log(mapBounds);
     stop();
 
     // build grid
@@ -467,6 +469,7 @@ var Windy = function (params) {
       interpolateField(grid, buildBounds(bounds, width, height), mapBounds, function (bounds, field) {
         // animate the canvas with random points
         windy.field = field;
+        console.log(field);
         animate(bounds, field);
       });
 

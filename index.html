@@ -65,8 +65,8 @@
       zoom: 2,
       style: 'mapbox://styles/katamarani4/ck5s617rv0px31it4t0l3bd0o',
       maxBounds: [
-        [-179, -59], // Southwest coordinates
-        [179, 69] // Northeast coordinates
+        [-180, -60], // Southwest coordinates
+        [180, 70] // Northeast coordinates
       ]
     });
 
@@ -105,7 +105,7 @@
       const obj = getEventObject(map);
       // console.log(obj);
       const { zoomLevel, north, south, west, east, width, height } = obj;
-
+      mapcanvas.style.display = 'none';
       northEast = coord4326To3857({
         'lat': north,
         'lng': east
@@ -146,18 +146,13 @@
         mapcanvas.style.display = 'initial';
         mapcanvas.width = width;
         mapcanvas.height = height;
-        // console.log('west: ' + west);
-        // console.log('east: ' + east);
-        console.log('west3857, south3857, east3857, north3857,')
-        console.log(west3857, south3857, east3857, north3857);
-        // console.log(northEast);
-        // console.log('Need to convert these 4326 coordinates to 3857 for Windy');
+
         windy.start(
           [[0, 0], [width, height]],
           width,
           height,
-          [[west3857, south3857,], [east3857, north3857,]],
-          // [[west, south,], [east, north,]],
+          // [[west3857, south3857,], [east3857, north3857,]],
+          [[west, south,], [east, north,]],
           { particleLineWidth: particleWidth }
         );
       }, 500)
@@ -178,15 +173,15 @@
       }
 
       northEast = coord4326To3857({
-        'lat': result.north,
-        'lng': result.east
+        'lat': dimensions.getNorth(),
+        'lng': dimensions.getEast()
       })
       north3857 = northEast.lat
       east3857 = northEast.lng
 
       southWest = coord4326To3857({
-        'lat': result.south,
-        'lng': result.west
+        'lat': dimensions.getSouth(),
+        'lng': dimensions.getWest()
       })
       south3857 = southWest.lat
       west3857 = southWest.lng
@@ -200,7 +195,7 @@
         east: east3857,
         zoomLevel: map.getZoom()
       }
-      return result3857;
+      return result;
     }
 
     fetch('gfs.json')
@@ -210,6 +205,7 @@
         // console.log(data);
         // Remember - dom elements with ID, are exposed globally, so mapcanvas element exists already
         windy = new Windy({ canvas: mapcanvas, data: data });
+        // console.log(windy);
         resetWind(map)
       })
 
