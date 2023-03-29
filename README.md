@@ -1,7 +1,6 @@
-[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
-
-
 # windjs-over-mapbox
+
+Forked to update to a working Demo. Seems to require a repropjection of units from 4326 to 3857 for windy.js to compute.
 
 Article - https://medium.com/@bumbeishvili/displaying-wind-map-over-a-live-map-3319003f6312
 
